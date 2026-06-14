@@ -3,6 +3,7 @@ on:
   push:
     branches:
       - main
+      - master
   pull_request:
 env:
   # Default version of Go to use by CI workflows. This should be the latest
@@ -12,10 +13,10 @@ env:
   # backwards compatibility with the previous two minor releases and we
   # explicitly test our code for these versions so keeping this at prior
   # versions does not add value.
-  DEFAULT_GO_VERSION: "~1.22.4"
+  DEFAULT_GO_VERSION: ~1.22.4
 jobs:
   test-bench:
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-24.04
     steps:
       - name: Checkout Repo
         uses: actions/checkout@v4
@@ -27,12 +28,12 @@ jobs:
         uses: actions/setup-go@v5
         with:
           go-version: ${{ env.DEFAULT_GO_VERSION }}
-          cache-dependency-path: "**/go.sum"
+          cache-dependency-path: '**/go.sum'
       - name: Run benchmarks to check functionality
         run: make test-bench
 
   test-race:
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-24.04
     steps:
       - name: Checkout Repo
         uses: actions/checkout@v4
@@ -41,24 +42,24 @@ jobs:
         with:
           go-version: ${{ env.DEFAULT_GO_VERSION }}
           check-latest: true
-          cache-dependency-path: "**/go.sum"
+          cache-dependency-path: '**/go.sum'
       - name: Run tests with race detector
         run: make test-race
 
   compatibility-test:
     strategy:
       matrix:
-        go-version: ["~1.22.4", "~1.21.11"]
+        go-version: [~1.22.4, ~1.21.11]
         platform:
-          - os: ubuntu-latest
-            arch: "386"
-          - os: ubuntu-latest
+          - os: ubuntu-24.04
+            arch: '386'
+          - os: ubuntu-24.04
             arch: amd64
-          - os: macos-latest
+          - os: macos-14
             arch: amd64
-          - os: windows-latest
-            arch: "386"
-          - os: windows-latest
+          - os: windows-2022
+            arch: '386'
+          - os: windows-2022
             arch: amd64
     runs-on: ${{ matrix.platform.os }}
     steps:
@@ -69,14 +70,14 @@ jobs:
         with:
           go-version: ${{ matrix.go-version }}
           check-latest: true
-          cache-dependency-path: "**/go.sum"
+          cache-dependency-path: '**/go.sum'
       - name: Run tests
         env:
           GOARCH: ${{ matrix.platform.arch }}
         run: make test-short
 
   test-compatibility:
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-24.04
     needs: [compatibility-test]
     steps:
       - name: Test if compatibility-test passed
